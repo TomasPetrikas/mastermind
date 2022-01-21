@@ -7,8 +7,37 @@ class Board
 
   attr_reader :board
 
-  def initialize()
+  def initialize
     @board = Array.new(MAX_TURNS) { Array.new(CODE_LENGTH, '_') }
+    @current_turn = 0
+  end
+end
+
+class Player
+  attr_reader :name, :code
+
+  # Code should be nil if player is not a code maker
+  def initialize(name, code = nil)
+    @name = name
+    @code = code
+  end
+end
+
+class ComputerPlayer < Player
+  def initialize(name)
+    super
+    @code = generate_code
+  end
+
+  private
+
+  def generate_code
+    code = []
+    Board::CODE_LENGTH.times do
+      code << Board::CODE_SYMBOLS.sample
+    end
+
+    code.join
   end
 end
 
@@ -17,6 +46,15 @@ class Display
     puts "Welcome to Mastermind!\n\n"
     rules
     selection
+  end
+
+  def print_board(board)
+    board.board.each do |row|
+      row.each do |cell|
+        print "| #{cell} "
+      end
+      print "|\n"
+    end
   end
 
   private
@@ -49,12 +87,29 @@ class Game
   def start
     @display.intro
     while true
-      @mode = gets.chomp.to_i
-      break if [1, 2].include?(@mode)
+      mode = gets.chomp.to_i
+      break if [1, 2].include?(mode)
 
       puts 'Oops, try again:'
     end
 
+    mode_maker if mode == 1
+    mode_breaker if mode == 2
+  end
+
+  private
+
+  # Play as code maker
+  def mode_maker
+    # TODO
+  end
+
+  # Play as code breaker
+  def mode_breaker
+    @p = Player.new('Player')
+    @c = ComputerPlayer.new('Computer')
+
+    @display.print_board(@board)
   end
 end
 
