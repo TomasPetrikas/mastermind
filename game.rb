@@ -13,6 +13,7 @@ class Game
   end
 
   def start
+    @display.clear_screen
     @display.intro
     while true
       mode = gets.chomp.to_i
