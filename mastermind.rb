@@ -1,4 +1,4 @@
-# Code probably should've been its own class, but I was too lazy to refactor
+# Code probably could've been its own class, but I was too lazy to refactor
 
 class Board
   CODE_SYMBOLS = ('1'..'6').to_a
@@ -85,10 +85,9 @@ end
 class Player
   attr_reader :name, :code
 
-  # Code should be nil if player is not a code maker
-  def initialize(name, code = nil)
+  def initialize(name, is_maker: false)
     @name = name
-    @code = code
+    @code = generate_code if is_maker
   end
 
   def guess
@@ -101,12 +100,29 @@ class Player
 
     guess
   end
+
+  private
+
+  def generate_code
+    while true
+      print "#{@name}, enter your secret code: "
+      code = gets.chomp
+      puts ''
+      break if Board.valid?(code)
+    end
+
+    code
+  end
 end
 
 class ComputerPlayer < Player
-  def initialize(name)
+  def initialize(name, is_maker: false)
     super
-    @code = generate_code
+  end
+
+  # TODO: make this actually good
+  def guess(_board)
+    generate_code
   end
 
   private
@@ -132,13 +148,28 @@ class Display
     puts 'Oops, try again:'
   end
 
+  def clear_screen
+    Gem.win_platform? ? (system 'cls') : (system 'clear')
+  end
+
   def print_board(board)
+    clear_screen
+
     board.board.each_with_index do |row, row_index|
       row.each do |cell|
         print "| #{cell} "
       end
       print "| #{board.clues[row_index].join}\n"
     end
+  end
+
+  def breaker_win(player, secret_code)
+    puts "#{player.name} has guessed correctly! The code was #{secret_code}."
+  end
+
+  def maker_win(winning_player, losing_player)
+    puts "#{losing_player.name} has run out of guesses. #{winning_player.name} wins!"
+    puts "(The code was #{winning_player.code})"
   end
 
   private
@@ -185,19 +216,44 @@ class Game
 
   # Play as code maker
   def mode_maker
-    # TODO
+    @p = Player.new('Player', is_maker: true)
+    @c = ComputerPlayer.new('Computer')
+
+    Board::MAX_TURNS.times do
+      @display.print_board(@board)
+      guess = @c.guess(@board)
+      @board.update(guess, @p.code)
+      sleep(1)
+      next unless guess == @p.code
+
+      @display.print_board(@board)
+      @display.breaker_win(@c, @p.code)
+      return
+    end
+
+    @display.print_board(@board)
+    @display.maker_win(@p, @c)
   end
 
   # Play as code breaker
   def mode_breaker
     @p = Player.new('Player')
-    @c = ComputerPlayer.new('Computer')
+    @c = ComputerPlayer.new('Computer', is_maker: true)
 
     Board::MAX_TURNS.times do
+      # p @c.code
       @display.print_board(@board)
       guess = @p.guess
       @board.update(guess, @c.code)
+      next unless guess == @c.code
+
+      @display.print_board(@board)
+      @display.breaker_win(@p, @c.code)
+      return
     end
+
+    @display.print_board(@board)
+    @display.maker_win(@c, @p)
   end
 end
 
