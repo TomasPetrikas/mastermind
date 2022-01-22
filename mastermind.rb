@@ -1,3 +1,5 @@
+# Code probably should've been its own class, but I was too lazy to refactor
+
 class Board
   CODE_SYMBOLS = ('1'..'6').to_a
   CODE_LENGTH = 4
@@ -5,11 +7,78 @@ class Board
   CLUE_WEAK = '~'.freeze
   CLUE_STRONG = 'X'.freeze
 
-  attr_reader :board
+  attr_reader :board, :clues, :current_turn
 
   def initialize
     @board = Array.new(MAX_TURNS) { Array.new(CODE_LENGTH, '_') }
+    @clues = Array.new(MAX_TURNS) { Array.new(CODE_LENGTH, ' ') }
     @current_turn = 0
+  end
+
+  def update(guess_code, secret_code)
+    return unless Board.valid?(guess_code) && Board.valid?(secret_code)
+
+    guess_arr = guess_code.split('')
+    secret_arr = secret_code.split('')
+    @board[@current_turn] = guess_arr.clone
+    @clues[@current_turn] = generate_clues(guess_arr, secret_arr)
+
+    @current_turn += 1
+  end
+
+  def self.valid?(code)
+    return false if code.length != CODE_LENGTH
+
+    code.split('').each do |char|
+      return false unless CODE_SYMBOLS.include?(char)
+    end
+
+    true
+  end
+
+  private
+
+  # Receives two arrays of length CODE_LENGTH
+  # Returns an array of length CODE_LENGTH
+  def generate_clues(guess_symbols, secret_symbols)
+    clues = []
+
+    # p secret_symbols.join
+
+    CODE_LENGTH.times do |i|
+      next unless secret_symbols[i] == guess_symbols[i]
+
+      clues << CLUE_STRONG
+      guess_symbols[i] = nil
+      secret_symbols[i] = nil
+    end
+
+    guess_symbols.delete(nil)
+    secret_symbols.delete(nil)
+
+    # p guess_symbols
+    # p secret_symbols
+
+    secret_symbols.each_with_index do |_ss, i|
+      guess_symbols.each_with_index do |_gs, j|
+        next unless secret_symbols[i] == guess_symbols[j]
+        next if secret_symbols[i].nil?
+
+        clues << CLUE_WEAK
+        guess_symbols[j] = nil
+        secret_symbols[i] = nil
+      end
+    end
+
+    # guess_symbols.delete(nil)
+    # secret_symbols.delete(nil)
+
+    # p guess_symbols
+    # p secret_symbols
+
+    clues << ' ' while clues.length < CODE_LENGTH
+
+    clues
   end
 end
 
@@ -20,6 +89,17 @@ class Player
   def initialize(name, code = nil)
     @name = name
     @code = code
+  end
+
+  def guess
+    while true
+      print "#{@name}, enter your guess: "
+      guess = gets.chomp
+      puts ''
+      break if Board.valid?(guess)
+    end
+
+    guess
   end
 end
 
@@ -48,12 +128,16 @@ class Display
     selection
   end
 
+  def try_again
+    puts 'Oops, try again:'
+  end
+
   def print_board(board)
-    board.board.each do |row|
+    board.board.each_with_index do |row, row_index|
       row.each do |cell|
         print "| #{cell} "
       end
-      print "|\n"
+      print "| #{board.clues[row_index].join}\n"
     end
   end
 
@@ -90,7 +174,7 @@ class Game
       mode = gets.chomp.to_i
       break if [1, 2].include?(mode)
 
-      puts 'Oops, try again:'
+      @display.try_again
     end
 
     mode_maker if mode == 1
@@ -109,7 +193,11 @@ class Game
     @p = Player.new('Player')
     @c = ComputerPlayer.new('Computer')
 
-    @display.print_board(@board)
+    Board::MAX_TURNS.times do
+      @display.print_board(@board)
+      guess = @p.guess
+      @board.update(guess, @c.code)
+    end
   end
 end
 
