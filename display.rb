@@ -51,7 +51,8 @@ class Display
     puts '4. If the code breaker gets 1 correct symbol in the correct location,'
     puts "   they receive this clue: #{Board::CLUE_STRONG}"
     puts '5. If the code breaker gets 1 correct symbol in the wrong location,'
-    puts "   they receive this clue: #{Board::CLUE_WEAK}\n\n"
+    puts "   they receive this clue: #{Board::CLUE_WEAK}"
+    puts "6. (The order of the clues does not matter.)\n\n"
   end
 
   def selection
