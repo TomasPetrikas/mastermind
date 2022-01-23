@@ -33,7 +33,7 @@ class Game
     @p = Player.new('Player', is_maker: true)
     @c = ComputerPlayer.new('Computer')
 
-    Board::MAX_TURNS.times do
+    while @board.current_turn < Board::MAX_TURNS
       @display.print_board(@board)
       guess = @c.guess(@board)
       @board.update(guess, @p.code)
@@ -54,7 +54,7 @@ class Game
     @p = Player.new('Player')
     @c = ComputerPlayer.new('Computer', is_maker: true)
 
-    Board::MAX_TURNS.times do
+    while @board.current_turn < Board::MAX_TURNS
       # p @c.code
       @display.print_board(@board)
       guess = @p.guess
