@@ -17,7 +17,9 @@ class Board
   end
 
   def update(guess_code, secret_code)
-    return unless Board.valid?(guess_code) && Board.valid?(secret_code)
+    unless Board.valid?(guess_code) && Board.valid?(secret_code)
+      raise "Error: one of the following codes is incorrect. Guess: #{guess_code}, Secret: #{secret_code}"
+    end
 
     guess_arr = guess_code.split('')
     secret_arr = secret_code.split('')
@@ -36,8 +38,6 @@ class Board
 
     true
   end
-
-  private
 
   # Receives two arrays of length CODE_LENGTH
   # Returns an array of length CODE_LENGTH
