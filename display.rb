@@ -12,6 +12,13 @@ class Display
     selection
   end
 
+  def difficulty
+    puts 'Please choose a difficulty level: '
+    puts "1 - #{Game::MAX_TURNS[0]} guesses (easy)"
+    puts "2 - #{Game::MAX_TURNS[1]} guesses (medium)"
+    puts "3 - #{Game::MAX_TURNS[2]} guesses (hard)"
+  end
+
   def try_again
     puts 'Oops, try again:'
   end
@@ -47,7 +54,7 @@ class Display
     puts '1. There is a code MAKER and a code BREAKER.'
     puts "2. The code maker comes up with a secret #{Board::CODE_LENGTH}-digit code,"
     puts "   made from the symbols #{Board::CODE_SYMBOLS.first} to #{Board::CODE_SYMBOLS.last}."
-    puts "3. The code breaker has #{Board::MAX_TURNS} attempts to break the code."
+    puts "3. The code breaker has #{Game::MAX_TURNS.first} attempts to break the code."
     puts '4. If the code breaker gets 1 correct symbol in the correct location,'
     puts "   they receive this clue: #{Board::CLUE_STRONG}"
     puts '5. If the code breaker gets 1 correct symbol in the wrong location,'

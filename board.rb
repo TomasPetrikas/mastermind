@@ -4,15 +4,14 @@
 class Board
   CODE_SYMBOLS = ('1'..'6').to_a
   CODE_LENGTH = 4
-  MAX_TURNS = 12
   CLUE_WEAK = '~'
   CLUE_STRONG = 'X'
 
   attr_reader :board, :clues, :current_turn
 
-  def initialize
-    @board = Array.new(MAX_TURNS) { Array.new(CODE_LENGTH, '_') }
-    @clues = Array.new(MAX_TURNS) { Array.new(CODE_LENGTH, ' ') }
+  def initialize(max_turns = 12)
+    @board = Array.new(max_turns) { Array.new(CODE_LENGTH, '_') }
+    @clues = Array.new(max_turns) { Array.new(CODE_LENGTH, ' ') }
     @current_turn = 0
   end
 
